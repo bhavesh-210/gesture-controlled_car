@@ -127,6 +127,6 @@ I wrote the car receiver firmware with an `OnDataRecv` callback to unpack the co
 
 Also added the HC-SR04 obstacle avoidance routine: if distance <= 20 cm, the car brakes automatically, waits 200 ms, turns right for 350 ms, and halts safely. Pressed the 65mm rubber wheels onto the motor shafts, powered on the 7.4V battery pack, and placed the car on the floor. Tilting my hand forward drives it ahead, tilting sideways steers it smoothly, and holding my palm flat stops it instantly. Zero lag and super fun to drive!
 
-![assembled car ready for drive](assets/PHOTO-2026-10-23-01-56-13.jpg)
+![assembled car ready for drive](assets/car-turning-test.jpg)
 
 **Total time spent: 3 hours**
