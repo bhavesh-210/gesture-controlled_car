@@ -63,7 +63,7 @@ The printed chassis parts were ready so today was full mechanical assembly day. 
 
 Laid everything out on the floor workbench to start testing the motor connections with the L298N driver and the receiver ESP32. Connected the ultrasonic sensor temporarily to check wire lengths and hooked up the blue 7.4V battery pack. As you can see in the photo there's a big mess of jumper wires and tools everywhere, but having all parts laid out flat makes it 10x easier to debug connections before stuffing everything into the chassis.
 
-![workbench assembly](assets/chassis-assembly-wiring.jpg)
+![workbench assembly](assets/PHOTO-2026-10-23-02-08-37.jpg)
 
 **Total time spent: 4 hours**
 
