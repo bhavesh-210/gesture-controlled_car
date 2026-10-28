@@ -13,7 +13,7 @@ For the brain of the operation, I will be using the ESP32 development board beca
 
 First I will perform a test breadboard setup and connect everything to the ESP32 boards, just to make sure they all work together the way I intend to.
 
-![circuit test](assets/circuit-photo.jpg)
+![circuit test](assets/PHOTO-2026-10-23-01-56-13.jpg)
 
 **Total time spent: 3 hours**
 
