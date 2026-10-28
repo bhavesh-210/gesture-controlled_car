@@ -13,7 +13,7 @@ For the brain of the operation, I will be using the ESP32 development board beca
 
 First I will perform a test breadboard setup and connect everything to the ESP32 boards, just to make sure they all work together the way I intend to.
 
-![circuit test](assets/PHOTO-2026-10-23-01-56-13.jpg)
+![circuit test](assets/circuit-photo.jpg)
 
 **Total time spent: 2 hours**
 
@@ -27,7 +27,7 @@ I also planned the HC-SR04 ultrasonic sensor hookup. The sensor requires 5V supp
 
 ![circuit schematic](assets/circuit-diagram.png)
 
-**Total time spent: 2 hours**
+**Total time spent: 1 hour**
 
 # CAD Part 1 - Main chassis base layout
 
@@ -57,7 +57,7 @@ I extruded two cylindrical circular cutouts matching the exact outer diameter of
 
 ![cad sensor mounts](assets/cad-bumper-mount.png)
 
-**Total time spent: 2 hours**
+**Total time spent: 1 hour**
 
 # CAD Part 4 - Full 3D assembly and wheel clearance
 
@@ -67,7 +67,7 @@ The main thing to double-check was wheel clearance. I imported standard 65mm rub
 
 ![cad full assembly](assets/cad-full-assembly.png)
 
-**Total time spent: 3 hours**
+**Total time spent: 2 hours**
 
 # CAD Part 5 - Structural reinforcement and slicing for print
 
@@ -77,7 +77,7 @@ Exported the complete assembly as a `.step` file and prepared the individual com
 
 ![cad reinforcement](assets/cad-reinforcement.png)
 
-**Total time spent: 2 hours**
+**Total time spent: 1 hour**
 
 # Physical chassis assembly and motor mounting
 
@@ -89,7 +89,7 @@ Tucked the wires along the inner floor of the chassis and checked that the motor
 
 ![chassis assembly inside](assets/PHOTO-2026-10-23-02-08-37.jpg)
 
-**Total time spent: 3 hours**
+**Total time spent: 2 hours**
 
 # Coding Part 1 - ESP-NOW setup and wireless communication
 
@@ -101,7 +101,7 @@ Inside `setup()`, I initialized the MPU-9250 accelerometer, set `WiFi.mode(WIFI_
 
 ![transmitter code setup](assets/code-espnow-setup.png)
 
-**Total time spent: 2 hours**
+**Total time spent: 1 hour**
 
 # Coding Part 2 - MPU-9250 gesture logic and angle math
 
@@ -117,7 +117,7 @@ Inside `detectCommand(pitch, roll)`, I added a 15-degree threshold filter to eli
 
 ![gesture detection code](assets/code-gesture-math.png)
 
-**Total time spent: 3 hours**
+**Total time spent: 2 hours**
 
 # Receiver motor control and floor driving test
 
@@ -129,4 +129,4 @@ Also added the HC-SR04 obstacle avoidance routine: if distance <= 20 cm, the car
 
 ![assembled car ready for drive](assets/PHOTO-2026-10-23-01-56-13.jpg)
 
-**Total time spent: 3 hours**
+**Total time spent: 2 hours**
