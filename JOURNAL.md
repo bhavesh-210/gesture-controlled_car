@@ -5,7 +5,7 @@ description: "A 4WD robotic car steered by hand gestures using two ESP32 microco
 created_at: "2026-10-18"
 ---
 
-# October 18, 2026: Ideation and component hunting
+# Ideation and component testing
 
 So currently i was thinking to build another rc vehicle bcz normal remote controllers with joysticks or mobile phone buttons feels too boring and mainstream. I wanted to build something intuitive like just tilting my palm to drive a car around.
 
@@ -17,7 +17,7 @@ Did a quick breadboard test with jumper wires to see if both ESP32 boards boot u
 
 **Total time spent: 3 hours**
 
-# October 19, 2026: IMU reading and tilt angle math
+# Circuit diagram and MPU-9250 gesture logic
 
 Today i sat down to write code for reading hand gestures from the MPU-9250. Wired it up to the transmitter ESP32 using I2C on GPIO 15 (SDA) and GPIO 14 (SCL). At first serial monitor was just throwing zeroes continuously bcz i forgot to pass custom pins inside Wire.begin(15, 14). Once that was fixed the raw accelerometer data (ax, ay, az) started printing cleanly.
 
@@ -33,24 +33,19 @@ Also drew out the complete circuit schematic in cirkit designer so i don't mess 
 
 **Total time spent: 4 hours**
 
-# October 20, 2026: ESP-NOW wireless communication tests
+# Building the hand-held gesture controller
 
-Today was focused on wireless link between the two ESP32s. I flashed a small MAC address reader sketch on the receiver ESP32 and noted down its address from serial monitor, then put that MAC address into peerInfo in the transmitter sketch.
+Today i assembled the transmitter setup so i can actually hold it comfortably in hand while testing. Placed the ESP32 and MPU-9250 together and wired 3V3, GND, SDA and SCL firmly so nothing comes loose when moving my wrist around.
 
-Created a simple data struct with just one integer for comand_id:
-typedef struct struct_message {
-  int comand_id;
-} struct_message;
+Wrote the ESP-NOW transmitter code. First i extracted the car ESP32's MAC address and registered it as an unencrypted peer on channel 0. Created a simple payload packet with just an integer for the command ID. Set the packet send rate to 100ms. Tested holding the controller in hand and tilting forward, back, left and right. Opened serial monitor on laptop and all commands were printing smoothly as my hand moved.
 
-Set transmission delay to 100ms. Tested walking into another room with the transmitter board while checking serial monitor on my laptop connected to the receiver board. Packets were arriving super fast with zero dropped packets and almost no noticeable delay. 
+Carrying the board in palm feels really natural and lightweight.
 
-Bench tested the L298N driver with the receiver esp32 using jumper wires to make sure logic signals were toggling HIGH and LOW correctly.
-
-![driver closeup](assets/motor-driver-closeup.jpg)
+![hand gesture controller](assets/hand-gesture-controller.jpg)
 
 **Total time spent: 3 hours**
 
-# October 21, 2026: 3D CAD modeling in Fusion 360
+# 3D CAD modeling in Fusion 360
 
 Started designing the custom chassis in Autodesk Fusion 360. Named the model "The Nonchalant". I really disliked the generic transparent acrylic laser cut chassis from market bcz they are fragile and look very messy with wires popping out from all sides.
 
@@ -62,7 +57,7 @@ Exported the complete assembly as .step file and prepared individual body compon
 
 **Total time spent: 5 hours**
 
-# October 22, 2026: Mounting motors, wheels and driver wiring
+# Chassis assembly and L298N motor wiring
 
 The printed chassis parts were ready so today was full mechanical assembly day. Screwed all 4 BO geared motors onto their brackets and pressed the 65mm rubber wheels onto the motor shafts. 
 
@@ -74,28 +69,38 @@ Here i hit a big issue: whenever motors started spinning, the ESP32 kept brownou
 
 **Total time spent: 4 hours**
 
-# October 23, 2026: Front obstacle sensor and bumper integration
+# HC-SR04 ultrasonic sensor and crash testing
 
 Today i mounted the HC-SR04 ultrasonic sensor into the front bumper of the chassis. Fitted the two round sensor cans into the 3D printed cutouts and glued them with a dab of hot glue from behind so vibration won't knock it loose.
 
 Wired Trig to GPIO 18 and Echo to GPIO 19. Important thing here is HC-SR04 runs on 5V and its Echo pin outputs a 5V pulse, but ESP32 GPIO pins are strictly 3.3V tolerant. If you connect it directly you risk damaging the ESP32 input pin. So i built a quick voltage divider using two resistors (1k and 2k) to step down the 5V echo pulse to safe 3.3V level.
 
-Wrote a quick test loop using pulseIn() to measure distance in centimeters. Tested bringing my palm in front of the car and verified that distance readings were accurate within 2 to 3 cm.
+Wrote the obstacle avoidance code: if distance <= 20 cm, the car brakes immediately, pauses 200ms, turns right for 350ms, and halts. Tested putting obstacles right in front on the ground to make sure the evasion triggers before hitting.
 
-![sensor mount](assets/sensor-mount.jpg)
+![obstacle avoidance testing](assets/obstacle-testing.jpg)
 
 **Total time spent: 3 hours**
 
-# October 24, 2026: Full integration, reverse toggle and floor testing
+# Indoor driving and speed calibration
 
-Final assembly and tuning day! Combined all codes together into the final receiver sketch: ESP-NOW callback, PWM speed control on GPIO 32 and 33, and the ultrasonic obstacle loop.
+Today was first real ground driving day! Put the car on the living room floor and powered both transmitter and receiver.
 
-First test run had a funny issue: when i tilted my hand left the car turned right, and when i tilted right it turned left. Realized i had swapped LIN and RIN motor control pins in the sketch. Fixed that in five minutes. Also tuned the motor speed to 180 out of 255 using 1000 Hz 8-bit LEDC PWM so it has plenty of torque to drive on carpet without running too wild.
+First problem was speed: at full duty cycle (255) the car was launching forward too aggressively and sliding on the tiles. I configured the ESP32 LEDC hardware PWM on GPIO 32 and GPIO 33 at 1000 Hz with 8-bit resolution, and dialed down the driving speed to 180. That gave the motors enough torque to start rolling without wheel spin.
 
-Tested the obstacle avoidance: when distance drops below 20 cm, the car automatically overrides gesture commands, brakes immediately, waits 200 ms, turns right for 350 ms, and stops. Tested driving directly towards a cardboard box and the car braked and pivoted away on its own.
+Drove straight paths and tested forward and braking gestures. The car glides across the floor smoothly whenever i tilt my hand forward, and stops dead in its tracks when i level my palm flat.
 
-Put the controller on my hand and drove the car around the living room floor. Tilting hand forward moves it forward, tilting sideways steers it smoothly, and holding hand flat stops it instantly. Whole build feels super responsive and fun to control!
-
-![assembled car](assets/PHOTO-2026-10-23-01-56-13.jpg)
+![driving test](assets/car-driving-action.jpg)
 
 **Total time spent: 4 hours**
+
+# Tuning skid steering and final demo
+
+Final day of testing and fine-tuning. Had to calibrate the skid steering bcz turning left was initially pivoting too slowly compared to turning right. Tuned the PWM values for differential drive: left turn stops left wheels while right wheels spin at 180, and right turn stops right wheels while left wheels spin at 180.
+
+Also tested the reverse mode toggle by pitching my hand backward. It flips the direction flag so the next forward tilt drives the car in reverse, which is super handy when you get stuck in a tight corner under a table.
+
+Recorded the final driving demo video showing hand tilting and the car steering responsively across the room. Everything works reliably with zero lag!
+
+![turning test](assets/car-turning-test.jpg)
+
+**Total time spent: 3 hours**
