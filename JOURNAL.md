@@ -37,7 +37,7 @@ I bolted all 4 BO geared motors onto their side brackets using long M3 machine s
 
 Next I laid out everything on my floor workbench to plan out the component placement. Placed the L298N driver right in the center, sat the receiver ESP32 next to it, slotted the ultrasonic sensor into the front bumper cutouts, and hooked up the blue 7.4V battery pack. As seen in the photo, there were jumper wires, screwdrivers and electrical tape all over the place, but laying everything out flat made it way easier to verify motor clearances and wire lengths before packaging.
 
-![workbench assembly](assets/chassis-assembly-wiring.jpg)
+![workbench assembly](assets/PHOTO-2026-10-23-02-08-37.jpg)
 
 **Total time spent: 4 hours**
 
