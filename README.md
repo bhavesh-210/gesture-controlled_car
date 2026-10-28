@@ -291,6 +291,8 @@ Put it on a clear floor and test driving it with hand gestures.
 
 <img width="1200" alt="CAD 3D Chassis View" src="assets/car-3d-model.svg" />
 
+<img width="1000" alt="Workbench Assembly and Wiring" src="assets/chassis-assembly-wiring.jpg" />
+
 <img width="1000" alt="Chassis and Hardware Inside" src="assets/PHOTO-2026-10-23-02-08-37.jpg" />
 
 The CAD model has the chassis body, motor mount holes and space for the battery and electronics.

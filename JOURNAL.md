@@ -53,15 +53,23 @@ I wanted a tub-style chassis with clean exterior where all 4 BO motors mount fir
 
 Exported the complete assembly as .step file and prepared individual body components for 3D printing. Took nearly 5 hours tweaking fillets and wall thickness.
 
-![cad model](assets/car-3d-model.svg)
+![cad fusion preview](assets/car-3d-model.svg)
 
 **Total time spent: 5 hours**
 
-# Chassis assembly and L298N motor wiring
+# Mounting motors, wheels and initial workbench wiring
 
 The printed chassis parts were ready so today was full mechanical assembly day. Screwed all 4 BO geared motors onto their brackets and pressed the 65mm rubber wheels onto the motor shafts. 
 
-Then came the wiring inside. Paired the two left motors together in parallel into OUT1 and OUT2 screw terminals on L298N, and the two right motors into OUT3 and OUT4. 
+Laid everything out on the floor workbench to start testing the motor connections with the L298N driver and the receiver ESP32. Connected the ultrasonic sensor temporarily to check wire lengths and hooked up the blue 7.4V battery pack. As you can see in the photo there's a big mess of jumper wires and tools everywhere, but having all parts laid out flat makes it 10x easier to debug connections before stuffing everything into the chassis.
+
+![workbench assembly](assets/chassis-assembly-wiring.jpg)
+
+**Total time spent: 4 hours**
+
+# Electronics packaging and driver wiring
+
+Now the real headache started which was packing all this wiring neatly inside the car body. The L298N driver has that tall red aluminum heat sink which takes up crazy amount of vertical height. Placed the driver right in the center and wired left two motors in parallel to OUT1/OUT2 and right motors to OUT3/OUT4.
 
 Here i hit a big issue: whenever motors started spinning, the ESP32 kept brownout resetting! Took me an hour of debugging with multimeter to realize that when DC motors draw initial stall current, battery voltage drops slightly and creates noise on power rail. Also i had not tied all grounds together properly. Connected battery negative, L298N GND and ESP32 GND into a single common ground junction and added a capacitor across the power input. After that the resets completely disappeared.
 
