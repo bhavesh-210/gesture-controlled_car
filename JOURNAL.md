@@ -5,7 +5,7 @@ description: "A 4WD robotic car steered by hand gestures using two ESP32 microco
 created_at: "2026-10-16"
 ---
 
-# October 16, 2026: Ideation and component testing
+# Ideation and component testing
 
 I decided I was going to build another RC car, and because the joysticks on standard remotes, and buttons on smart phones is so unoriginal and boring, I decided to go with something else. For example, using hand gestures to drive the car would be cool and a whole lot more innovative and exciting than the remote controlled cars we see on the market.
 
@@ -13,11 +13,11 @@ For the brain of the operation, I will be using the ESP32 development board beca
 
 First I will perform a test breadboard setup and connect everything to the ESP32 boards, just to make sure they all work together the way I intend to.
 
-![circuit test](assets/circuit-photo.jpg)
+![circuit test](assets/PHOTO-2026-10-23-01-56-13.jpg)
 
 **Total time spent: 2 hours**
 
-# October 17, 2026: Circuit diagram and electrical planning
+# Circuit diagram and electrical planning
 
 Before committing to any hardware soldering or chassis printing, I sat down in Cirkit Designer to map out the complete wiring diagram. 
 
@@ -29,7 +29,7 @@ I also planned the HC-SR04 ultrasonic sensor hookup. The sensor requires 5V supp
 
 **Total time spent: 2 hours**
 
-# October 18, 2026: CAD Part 1 - Main chassis base layout
+# CAD Part 1 - Main chassis base layout
 
 Started designing the custom car body in Autodesk Fusion 360. Named the project "The Nonchalant". I really wanted to avoid using those flimsy generic acrylic plates from the market that snap easily and leave messy exposed wires everywhere.
 
@@ -39,7 +39,7 @@ Today I began with the main 2D sketch of the lower chassis tub. I laid out the o
 
 **Total time spent: 2 hours**
 
-# October 19, 2026: CAD Part 2 - Side panels and motor mounting brackets
+# CAD Part 2 - Side panels and motor mounting brackets
 
 With the base plate ready, I moved on to designing the side motor mounts. The car uses four BO geared DC motors, so I needed four sturdy mounting brackets directly integrated into the side walls.
 
@@ -49,7 +49,7 @@ I carefully measured the spacing between the mounting holes on the BO motor gear
 
 **Total time spent: 2 hours**
 
-# October 20, 2026: CAD Part 3 - Front bumper and ultrasonic sensor mounts
+# CAD Part 3 - Front bumper and ultrasonic sensor mounts
 
 Today was focused on the front nose section of the chassis. To make the crash prevention look integrated rather than like an afterthought, I designed a dedicated front bumper mount for the HC-SR04 ultrasonic sensor.
 
@@ -59,7 +59,7 @@ I extruded two cylindrical circular cutouts matching the exact outer diameter of
 
 **Total time spent: 2 hours**
 
-# October 21, 2026: CAD Part 4 - Full 3D assembly and wheel clearance
+# CAD Part 4 - Full 3D assembly and wheel clearance
 
 Brought all the individual CAD components and bodies together inside Fusion 360 to verify the full assembly. 
 
@@ -69,7 +69,7 @@ The main thing to double-check was wheel clearance. I imported standard 65mm rub
 
 **Total time spent: 3 hours**
 
-# October 22, 2026: CAD Part 5 - Structural reinforcement and slicing for print
+# CAD Part 5 - Structural reinforcement and slicing for print
 
 Final CAD polish day before 3D printing. I added internal structural ribs along the corners and fillets on the motor bracket joints to distribute mechanical stress and avoid layer line fractures.
 
@@ -79,7 +79,7 @@ Exported the complete assembly as a `.step` file and prepared the individual com
 
 **Total time spent: 2 hours**
 
-# October 23, 2026: Physical chassis assembly and motor mounting
+# Physical chassis assembly and motor mounting
 
 The 3D printed chassis parts came out great! Today was full mechanical assembly day.
 
@@ -91,44 +91,42 @@ Tucked the wires along the inner floor of the chassis and checked that the motor
 
 **Total time spent: 3 hours**
 
-# October 24, 2026: Wiring power rails and fixing brownout reset
+# Coding Part 1 - ESP-NOW setup and wireless communication
 
-Today I finished the electrical wiring and pressed the 65mm rubber tires onto the four motor shafts.
+Today I started writing the transmitter code in the Arduino IDE for the hand controller. 
 
-Wired the left two motors in parallel to L298N OUT1 and OUT2, and the right two motors to OUT3 and OUT4. Connected the 7.4V battery pack through a power switch to the driver terminal. 
+First I set up all the necessary libraries: `#include <WiFi.h>`, `<esp_now.h>`, `<Wire.h>`, and `<MPU9250_asukiaaa.h>`. Defined the custom I2C pins with `#define SDA_PIN 15` and `#define SCL_PIN 14`. Created an enum for the command IDs (FORWARD, LEFT_CMD, RIGHT_CMD, BRAKE_CMD, REVERSE_CMD) and a lightweight `struct_message` packet containing just the command integer so transmission stays ultra fast.
 
-Here I ran into an annoying issue: whenever the motors kicked on, the ESP32 would immediately brownout reset! I checked with a multimeter and realized that when DC motors draw initial stall current, the battery voltage dips momentarily and creates noise on the power rail. To fix this, I tied the battery negative, L298N GND and ESP32 GND into a single solid common ground point, and added a decoupling capacitor across the power input. After that, the board ran completely stable without any reboots.
+Inside `setup()`, I initialized the MPU-9250 accelerometer, set `WiFi.mode(WIFI_STA)`, and registered the receiver ESP32's MAC address with `esp_now_add_peer()`. Verified that ESP-NOW initialized successfully and opened the serial monitor to check peer status.
 
-![assembled car](assets/PHOTO-2026-10-23-01-56-13.jpg)
+![transmitter code setup](assets/code-espnow-setup.png)
 
 **Total time spent: 2 hours**
 
-# October 25, 2026: Coding transmitter gestures and ESP-NOW
+# Coding Part 2 - MPU-9250 gesture logic and angle math
 
 For the gestures, I used the MPU-9250. It’s an I2C device that interfaces easily with my transmitter ESP32, as long as you remember to assign I2C to specific pins on your ESP32. GPIO pins 15 and 14 for SDA and SCL respectively are the correct pins. With I2C I was able to begin reading the raw accelerometer data (ax, ay, az).
 
 Now for the next part of my project. It's time for some simple trigonometry. With some simple programming and calculations, I have been able to make an effective angle system, as well as being able to read and distinguish gestures such as forward and backward, and left and right motions of my transmitter ESP32:
-pitch = atan2(ax, sqrt(ay*ay + az*az)) * 180 / 3.14
-roll  = atan2(ay, sqrt(ax*ax + az*az)) * 180 / 3.14
+```cpp
+float pitch = atan2(ax, sqrt(ay * ay + az * az)) * 180 / PI;
+float roll  = atan2(ay, sqrt(ax * ax + az * az)) * 180 / PI;
+```
 
-A big hurdle was that natural hand tremors were triggering jittery false commands while holding the hand flat. I coded a 15-degree deadzone filter so small tilts don't register. Then I configured ESP-NOW in Wi-Fi station mode, registered the car ESP32's MAC address as an unencrypted peer, and packaged the commands into a small 4-byte struct packet sent every 100 ms. 
+Inside `detectCommand(pitch, roll)`, I added a 15-degree threshold filter to eliminate hand tremors: if pitch > 15 it returns FORWARD, if pitch < -15 it returns REVERSE_CMD, and roll tilts return RIGHT_CMD or LEFT_CMD. The packet is dispatched via `esp_now_send()` every 100 ms. Tested tilting my hand and verified clean serial output!
 
-Tested holding the transmitter board in my palm and tilting in all four directions. Serial monitor printed FORWARD, REVERSE, LEFT, RIGHT, and BRAKE cleanly with zero lag!
-
-![cad model render](assets/cad-model-render.png)
+![gesture detection code](assets/code-gesture-math.png)
 
 **Total time spent: 3 hours**
 
-# October 26, 2026: Coding receiver firmware and floor driving test
+# Receiver motor control and floor driving test
 
 Today was the final coding and driving day! 
 
-I wrote the receiver code with an `OnDataRecv` callback to unpack incoming commands and drive the motors with skid steering. Configured ESP32 LEDC hardware PWM on GPIO 32 and 33 running at 1000 Hz with 8-bit resolution. Tested driving on the living room floor; at full 255 speed the wheels slipped on the tiles, so I dialed down `motorSpeed` to 180, which gave solid traction.
+I wrote the car receiver firmware with an `OnDataRecv` callback to unpack the commands and drive the motors using differential skid steering. Configured ESP32 LEDC hardware PWM on GPIO 32 and 33 running at 1000 Hz with 8-bit resolution. Tuned `motorSpeed` to 180 out of 255 for solid traction without wheel spin on tiles.
 
-Next I coded the obstacle avoidance logic: if the ultrasonic sensor reads distance <= 20 cm, the car automatically overrides gesture packets, brakes immediately, pauses 200ms, turns right for 350ms, and halts safely. 
+Also added the HC-SR04 obstacle avoidance routine: if distance <= 20 cm, the car brakes automatically, waits 200 ms, turns right for 350 ms, and halts safely. Pressed the 65mm rubber wheels onto the motor shafts, powered on the 7.4V battery pack, and placed the car on the floor. Tilting my hand forward drives it ahead, tilting sideways steers it smoothly, and holding my palm flat stops it instantly. Zero lag and super fun to drive!
 
-Put the controller on my hand and drove the car around the room. Tilting forward moves the car ahead, tilting left/right steers it smoothly, and holding my palm flat brakes instantly. It drives super responsive with zero perceptible lag!
-
-![driving test](assets/car-driving-action.jpg)
+![assembled car ready for drive](assets/PHOTO-2026-10-23-01-56-13.jpg)
 
 **Total time spent: 3 hours**
